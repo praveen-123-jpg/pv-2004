@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stopwatch</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+        }
+
+        .stopwatch {
+            background-color: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            width: 300px;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+        }
+
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background-color: #ff6600;
+            color: #fff;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .display {
+            margin-bottom: 20px;
+        }
+
+        #stopwatchDisplay {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        #lapTimes {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        #lapTimes li {
+            margin-bottom: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="stopwatch">
+        <div class="controls">
+            <button id="startBtn" onclick="startStopwatch()">Start</button>
+            <button id="pauseBtn" onclick="pauseStopwatch()" disabled>Pause</button>
+            <button id="lapBtn" onclick="recordLap()" disabled>Lap</button>
+            <button id="resetBtn" onclick="resetStopwatch()" disabled>Reset</button>
+        </div>
+        <div class="display">
+            <div id="stopwatchDisplay">00:00.000</div>
+            <ul id="lapTimes"></ul>
+        </div>
+    </div>
+
+    <script>
+        let stopwatchInterval;
+        let startTime;
+        let elapsedTime = 0;
+        let laps = [];
+        let isRunning = false;
+
+        const stopwatchDisplay = document.getElementById('stopwatchDisplay');
+        const lapTimesList = document.getElementById('lapTimes');
+        const startBtn = document.getElementById('startBtn');
+        const pauseBtn = document.getElementById('pauseBtn');
+        const lapBtn = document.getElementById('lapBtn');
+        const resetBtn = document.getElementById('resetBtn');
+
+        function startStopwatch() {
+            if (!isRunning) {
+                isRunning = true;
+                startBtn.disabled = true;
+                pauseBtn.disabled = false;
+                lapBtn.disabled = false;
+                resetBtn.disabled = false;
+
+                startTime = Date.now() - elapsedTime;
+                stopwatchInterval = setInterval(updateStopwatch, 10);
+            }
+        }
+
+        function updateStopwatch() {
+            const now = Date.now();
+            elapsedTime = now - startTime;
+            displayTime(elapsedTime);
+        }
+
+        function displayTime(milliseconds) {
+            const date = new Date(milliseconds);
+            const minutes = Math.floor(milliseconds / (60 * 1000)).toString().padStart(2, '0');
+            const seconds = Math.floor((milliseconds % (60 * 1000)) / 1000).toString().padStart(2, '0');
+            const millisecondsFormatted = (milliseconds % 1000).toString().padStart(3, '0');
+            stopwatchDisplay.textContent = ${minutes}:${seconds}.${millisecondsFormatted};
+        }
+
+        function pauseStopwatch() {
+            clearInterval(stopwatchInterval);
+            isRunning = false;
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+        }
+
+        function recordLap() {
+            const lapTime = elapsedTime;
+            laps.push(lapTime);
+
+            const lapIndex = laps.length;
+            const lapItem = document.createElement('li');
+            lapItem.textContent = Lap ${lapIndex}: ${formatLapTime(lapTime)};
+            lapTimesList.appendChild(lapItem);
+        }
+
+        function formatLapTime(milliseconds) {
+            const date = new Date(milliseconds);
+            const minutes = Math.floor(milliseconds / (60 * 1000)).toString().padStart(2, '0');
+            const seconds = Math.floor((milliseconds % (60 * 1000)) / 1000).toString().padStart(2, '0');
+            const millisecondsFormatted = (milliseconds % 1000).toString().padStart(3, '0');
+            return ${minutes}:${seconds}.${millisecondsFormatted};
+        }
+
+        function resetStopwatch() {
+            clearInterval(stopwatchInterval);
+            isRunning = false;
+            elapsedTime = 0;
+            laps = [];
+            displayTime(elapsedTime);
+            lapTimesList.innerHTML = '';
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            lapBtn.disabled = true;
+            resetBtn.disabled = true;
+        }
+    </script>
+</body>
+</html>
